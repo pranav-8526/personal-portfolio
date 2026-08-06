@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![Portfolio](https://img.shields.io/badge/Live_Portfolio-1E90FF?style=for-the-badge&logo=vercel&logoColor=white)](https://personal-portfolio-green-five.vercel.app)
+[![Portfolio](https://img.shields.io/badge/Live_Portfolio-1E90FF?style=for-the-badge&logo=globe&logoColor=white)](https://personal-portfolio-green-five.vercel.app)
 [![Email](https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:pranavprp08@gmail.com?subject=Portfolio%20Inquiry%20-%20Pranav)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/pranavr/)
 
