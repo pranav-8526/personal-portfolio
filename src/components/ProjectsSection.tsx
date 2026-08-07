@@ -80,10 +80,14 @@ export const ProjectsSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 md:px-12 w-full flex flex-col items-center justify-center gap-16 sm:gap-24">
         {/* Section Heading: Big Bold Hero Heading */}
         <motion.h2
-          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 40, scale: shouldReduceMotion ? 1 : 0.9 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as const }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0.4 }
+              : { type: 'spring', stiffness: 140, damping: 14 }
+          }
           className="hero-heading font-black uppercase text-center text-[clamp(2.5rem,8vw,100px)] leading-none tracking-tight"
         >
           Project
@@ -116,36 +120,83 @@ const ProjectCard: React.FC<{
   // Spring Configuration for Fluid Smoothness
   const springConfig = { stiffness: 100, damping: 20 };
 
-  // Parallax translation transforms (Right image translated faster than left column)
-  const rawLeftY = useTransform(scrollYProgress, [0, 1], [25, -25]);
-  const rawRightY = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  // Strengthened Differential Parallax (Left column 0.85x speed, Right tall image 1.15x speed)
+  const rawLeftY = useTransform(scrollYProgress, [0, 1], [35, -35]);
+  const rawRightY = useTransform(scrollYProgress, [0, 1], [70, -70]);
+  const rawImageScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.08, 1, 0.95]);
   const rawScale = useTransform(scrollYProgress, [0, 0.8, 1], [1, 0.97, 0.94]);
 
   const leftY = useSpring(rawLeftY, springConfig);
   const rightY = useSpring(rawRightY, springConfig);
+  const imageScale = useSpring(rawImageScale, springConfig);
   const targetScale = useSpring(rawScale, springConfig);
 
-  // Entrance Variants for Top Row & Text Elements
+  // Entrance Choreography Variants
+  // 1. Number: Zoom-in and settle (scale 1.4 -> 1, opacity 0 -> 1)
   const numberVariant: Variants = {
-    hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9 },
+    hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.4 },
     visible: {
       opacity: 1,
       scale: 1,
-      transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] as const },
+      transition: shouldReduceMotion
+        ? { duration: 0.4 }
+        : { type: 'spring', stiffness: 180, damping: 12 },
     },
   };
 
-  const textVariant: Variants = {
-    hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 },
-    visible: (custom: number) => ({
+  // 2. Category label: Slide in from right (x: 30 -> 0)
+  const categoryVariant: Variants = {
+    hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 30 },
+    visible: {
       opacity: 1,
       x: 0,
+      transition: shouldReduceMotion
+        ? { duration: 0.4, delay: 0.1 }
+        : { type: 'spring', stiffness: 200, damping: 12, delay: 0.1 },
+    },
+  };
+
+  // 3. Project Title: Slide in from left (x: -30 -> 0)
+  const titleVariant: Variants = {
+    hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -30 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: shouldReduceMotion
+        ? { duration: 0.4, delay: 0.15 }
+        : { type: 'spring', stiffness: 200, damping: 12, delay: 0.15 },
+    },
+  };
+
+  // 4. Staggered Text & Tech Tags: Slide/Fade
+  const textVariant: Variants = {
+    hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 },
+    visible: (custom: number) => ({
+      opacity: 1,
+      y: 0,
       transition: {
-        delay: custom * 0.1,
-        duration: 0.5,
+        delay: 0.2 + custom * 0.08,
+        duration: 0.45,
         ease: [0.25, 0.1, 0.25, 1] as const,
       },
     }),
+  };
+
+  // 5. Live Project CTA Button: Spring Pop-In (scale: 0 -> 1.1 -> 1)
+  const buttonPopVariant: Variants = {
+    hidden: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: shouldReduceMotion
+        ? { duration: 0.4, delay: 0.5 }
+        : {
+            type: 'spring',
+            stiffness: 250,
+            damping: 15,
+            delay: 0.45,
+          },
+    },
   };
 
   return (
@@ -160,7 +211,7 @@ const ProjectCard: React.FC<{
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-center w-full">
         {/* Left Column (Text & Editorial Details with Parallax) */}
         <motion.div
-          style={{ y: shouldReduceMotion ? 0 : leftY }}
+          style={{ y: shouldReduceMotion ? 0 : leftY, willChange: 'transform' }}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
@@ -170,14 +221,13 @@ const ProjectCard: React.FC<{
           <div className="flex items-center gap-4 w-full">
             <motion.span
               variants={numberVariant}
-              className="hero-heading font-black text-6xl md:text-7xl leading-none"
+              className="hero-heading font-black text-6xl md:text-7xl leading-none inline-block"
             >
               {project.number}
             </motion.span>
             <div className="flex-1 border-t border-[#D7E2EA]/20"></div>
             <motion.span
-              custom={1}
-              variants={textVariant}
+              variants={categoryVariant}
               className="text-xs uppercase tracking-widest text-[#8FA3AE] font-mono font-semibold shrink-0"
             >
               {project.category}
@@ -186,8 +236,7 @@ const ProjectCard: React.FC<{
 
           {/* Elegant Display Title */}
           <motion.h3
-            custom={2}
-            variants={textVariant}
+            variants={titleVariant}
             className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.65rem] text-[#D7E2EA] font-bold leading-[1.15] tracking-tight font-display"
           >
             {project.title}
@@ -195,7 +244,7 @@ const ProjectCard: React.FC<{
 
           {/* Description Paragraph */}
           <motion.p
-            custom={3}
+            custom={1}
             variants={textVariant}
             className="font-light leading-relaxed text-[#D7E2EA]/85 text-base sm:text-lg md:text-xl max-w-xl font-sans"
           >
@@ -203,11 +252,11 @@ const ProjectCard: React.FC<{
           </motion.p>
 
           {/* Tech Stack Pills */}
-          <motion.div custom={4} variants={textVariant} className="flex flex-wrap gap-2.5 pt-2">
+          <motion.div custom={2} variants={textVariant} className="flex flex-wrap gap-2.5 pt-2">
             {project.techTags.map((tech) => (
               <span
                 key={tech}
-                className="border border-[#D7E2EA]/20 rounded-full px-4 py-1.5 text-xs sm:text-sm text-[#D7E2EA] font-mono tracking-wide bg-[#0C0C0C]"
+                className="border border-[#D7E2EA]/20 rounded-full px-4 py-1.5 text-xs sm:text-sm text-[#D7E2EA] font-mono tracking-wide bg-[#0C0C0C] hover:border-[#FF3B3B]/40 hover:text-white transition-colors"
               >
                 {tech}
               </span>
@@ -215,7 +264,7 @@ const ProjectCard: React.FC<{
           </motion.div>
 
           {/* Read Case Study Link */}
-          <motion.div custom={5} variants={textVariant} className="pt-3">
+          <motion.div custom={3} variants={textVariant} className="pt-3">
             <a
               href={project.githubUrl}
               target="_blank"
@@ -227,23 +276,41 @@ const ProjectCard: React.FC<{
           </motion.div>
         </motion.div>
 
-        {/* Right Column (Framed Visual Architecture Diagram with Higher-Speed Parallax) */}
+        {/* Right Column (Framed Visual Architecture Diagram with Higher Speed Parallax & Glow Pulse) */}
         <motion.div
-          style={{ y: shouldReduceMotion ? 0 : rightY }}
+          style={{ y: shouldReduceMotion ? 0 : rightY, willChange: 'transform' }}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
           className="lg:col-span-6 w-full flex flex-col justify-center gap-3"
         >
-          <div className="w-full relative border border-[#D7E2EA]/15 rounded-2xl bg-[#0a0a0c] p-4 sm:p-6 overflow-hidden flex flex-col justify-between shadow-2xl min-h-[300px] sm:min-h-[360px] md:min-h-[420px] max-h-[480px]">
+          <motion.div
+            style={{ scale: shouldReduceMotion ? 1 : imageScale, willChange: 'transform' }}
+            whileInView={
+              shouldReduceMotion
+                ? undefined
+                : {
+                    boxShadow: [
+                      '0 0 0px 0px rgba(255,59,59,0)',
+                      '0 0 35px -5px rgba(255,59,59,0.25), 0 0 35px -5px rgba(59,130,246,0.25)',
+                      '0 0 20px -5px rgba(255,59,59,0.15)',
+                    ],
+                  }
+            }
+            transition={{ duration: 2, repeat: Infinity, repeatType: 'reverse' }}
+            className="w-full relative border border-[#D7E2EA]/15 rounded-2xl bg-[#0a0a0c] p-4 sm:p-6 overflow-hidden flex flex-col justify-between shadow-2xl min-h-[300px] sm:min-h-[360px] md:min-h-[420px] max-h-[480px] transition-all duration-500 hover:border-[#FF3B3B]/30"
+          >
             {/* Top-Right Frame Overlay */}
             <div className="absolute top-4 right-4 z-10 text-[10px] sm:text-xs uppercase tracking-widest text-[#8FA3AE] font-mono bg-[#0C0C0C]/80 px-3 py-1 rounded-full border border-[#D7E2EA]/10 backdrop-blur-md">
               {project.pageIndex} / 0{totalProjects} · {project.shortTag}
             </div>
 
             {/* Architecture Diagram Image */}
-            <div className="w-full flex-1 flex items-center justify-center py-6 my-auto">
+            <div className="w-full flex-1 flex items-center justify-center py-6 my-auto overflow-hidden">
               <img
                 src={project.diagramImg}
                 alt={`${project.title} architecture diagram`}
-                className="w-full h-full max-h-[360px] object-contain mx-auto select-none"
+                className="w-full h-full max-h-[360px] object-contain mx-auto select-none transition-transform duration-500 hover:scale-105"
               />
             </div>
 
@@ -256,11 +323,11 @@ const ProjectCard: React.FC<{
                 {project.frameSummary}
               </span>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Live Demo Button right under Architecture Image */}
+          {/* Live Demo Button right under Architecture Image with Spring Pop-In */}
           {project.liveDemoUrl && (
-            <motion.div custom={6} variants={textVariant} className="flex justify-end pt-1">
+            <motion.div variants={buttonPopVariant} className="flex justify-end pt-1">
               <a
                 href={project.liveDemoUrl}
                 target="_blank"
