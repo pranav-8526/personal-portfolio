@@ -1,5 +1,5 @@
 import React from 'react';
-import { FadeIn } from './MotionUtils';
+import { motion, useReducedMotion, Variants } from 'framer-motion';
 
 interface SkillItem {
   number: string;
@@ -47,6 +47,36 @@ const skillsList: SkillItem[] = [
 ];
 
 export const SkillsSection: React.FC = () => {
+  const shouldReduceMotion = useReducedMotion();
+
+  // Coordinated wave entrance parent variants
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  // Card entrance variants (opacity, y-translate 30px -> 0, scale 0.95 -> 1)
+  const cardVariants: Variants = {
+    hidden: shouldReduceMotion
+      ? { opacity: 0 }
+      : { opacity: 0, y: 30, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: [0.25, 0.1, 0.25, 1] as const,
+      },
+    },
+  };
+
   return (
     <section
       id="skills"
@@ -54,35 +84,56 @@ export const SkillsSection: React.FC = () => {
     >
       <div className="max-w-5xl mx-auto flex flex-col items-center">
         {/* Section Heading */}
-        <FadeIn delay={0} y={30}>
+        <motion.div
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as const }}
+        >
           <h2 className="hero-heading font-black uppercase tracking-tight text-[12vw] sm:text-[11vw] md:text-[10vw] lg:text-[9.5vw] leading-none select-none text-center mb-16 sm:mb-20 md:mb-28">
             SKILLS
           </h2>
-        </FadeIn>
+        </motion.div>
 
-        {/* Skills Vertical List */}
-        <div className="w-full flex flex-col border-t border-[#0C0C0C]/15">
-          {skillsList.map((item, index) => (
-            <FadeIn key={item.number} delay={index * 0.1} y={30}>
-              <div className="flex flex-col md:flex-row md:items-baseline gap-4 md:gap-8 py-8 sm:py-10 md:py-12 border-b border-[#0C0C0C]/15">
-                {/* Number */}
-                <span className="font-black text-[#0C0C0C] text-[clamp(3rem,10vw,140px)] leading-none shrink-0">
-                  {item.number}
-                </span>
+        {/* Skills Wave Grid Container */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          className="w-full flex flex-col border-t border-[#0C0C0C]/15"
+        >
+          {skillsList.map((item) => (
+            <motion.div
+              key={item.number}
+              variants={cardVariants}
+              whileHover={
+                shouldReduceMotion
+                  ? undefined
+                  : {
+                      y: -6,
+                      transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] as const },
+                    }
+              }
+              className="group relative flex flex-col md:flex-row md:items-baseline gap-4 md:gap-8 py-8 sm:py-10 md:py-12 border-b border-[#0C0C0C]/15 rounded-2xl px-6 -mx-6 transition-all duration-300 hover:bg-gradient-to-r hover:from-[#FF3B3B]/5 hover:to-[#3B82F6]/5 hover:border-transparent hover:shadow-[0_10px_30px_-10px_rgba(255,59,59,0.15)]"
+            >
+              {/* Number */}
+              <span className="font-black text-[#0C0C0C] text-[clamp(3rem,10vw,140px)] leading-none shrink-0 group-hover:bg-gradient-to-r group-hover:from-[#FF3B3B] group-hover:to-[#3B82F6] group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
+                {item.number}
+              </span>
 
-                {/* Name + Description */}
-                <div className="flex flex-col gap-2">
-                  <h3 className="font-medium uppercase text-[#0C0C0C] text-[clamp(1rem,2.2vw,2.1rem)]">
-                    {item.title}
-                  </h3>
-                  <p className="font-light leading-relaxed text-[#0C0C0C] opacity-60 max-w-2xl text-[clamp(0.85rem,1.6vw,1.25rem)]">
-                    {item.description}
-                  </p>
-                </div>
+              {/* Name + Description */}
+              <div className="flex flex-col gap-2">
+                <h3 className="font-medium uppercase text-[#0C0C0C] text-[clamp(1rem,2.2vw,2.1rem)] group-hover:text-[#0C0C0C] transition-colors">
+                  {item.title}
+                </h3>
+                <p className="font-light leading-relaxed text-[#0C0C0C] opacity-60 max-w-2xl text-[clamp(0.85rem,1.6vw,1.25rem)]">
+                  {item.description}
+                </p>
               </div>
-            </FadeIn>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   SiSplunk,
   SiWireshark,
@@ -165,6 +165,7 @@ const skillsList: SkillItem[] = [
 
 export const ServicesSection: React.FC = () => {
   const targetRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: targetRef,
     offset: ['start start', 'end end'],
