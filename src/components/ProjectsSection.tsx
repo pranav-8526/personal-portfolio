@@ -103,7 +103,7 @@ const ProjectCard: React.FC<{
         <div className="lg:col-span-6 flex flex-col gap-6 text-left">
           {/* Row: Number, Horizontal Line, Category */}
           <div className="flex items-center gap-4 w-full">
-            <span className="font-black text-6xl md:text-7xl leading-none" style={{ color: project.accentColor }}>
+            <span className="hero-heading font-black text-6xl md:text-7xl leading-none">
               {project.number}
             </span>
             <div className="flex-1 border-t border-[#D7E2EA]/20"></div>
