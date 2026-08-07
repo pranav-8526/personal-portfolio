@@ -11,7 +11,7 @@ export const AboutSection: React.FC = () => {
   });
 
   const paragraphText =
-    "Artificial Intelligence and Data Science undergraduate with a versatile foundation spanning cybersecurity and SOC operations, Microsoft Azure cloud infrastructure, DevOps automation, and Generative AI application engineering. I've analyzed security logs and led incident response through the Deloitte Cybersecurity Job Simulation, provisioned Azure resources with Terraform, and built CI/CD pipelines with GitHub Actions and Docker. Let's build something secure and intelligent together!";
+    "I'm an AI & Data Science undergraduate with strong interest and hands-on knowledge across AI, cloud infrastructure, and cybersecurity. I don't just study these areas — I build with them. I've used AI (via the Gemini API) to power RIG, a runtime security proxy that defends AI agents against prompt-injection and tool-poisoning attacks, provisioned secure cloud environments on Azure with Terraform, and worked through real-world-style security incidents via Deloitte's Cybersecurity Job Simulation. My focus right now is simple: build intelligent systems, and make sure they're secure by design.";
 
   const scrollToContact = () => {
     const el = document.getElementById('contact');
